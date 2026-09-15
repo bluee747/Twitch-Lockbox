@@ -1,76 +1,77 @@
-# Streamer.bot Wire-up — Neverwinter Lockbox Opener
+# Streamer.bot wire-up — chat command → overlay animation
+
+## How it works
+
+1. Viewer types in chat: `!lockbox` or `!lockbox dragon`
+2. Streamer.bot Command trigger runs **Execute C# Code** (`OpenLockbox.cs`)
+3. C# rolls loot from `data/boxes.json`, announces in chat
+4. C# calls `CPH.WebsocketBroadcastJson` with `{ "type": "lockbox.open", ... }`
+5. OBS **Browser Source** (`overlay/index.html`) is connected to Streamer.bot’s WebSocket Server and plays the open animation
+
+The overlay does **not** parse chat itself. Streamer.bot listens to chat; the browser source only listens for the broadcast.
+
+---
 
 ## 1. Enable WebSocket Server
 
 1. Open **Streamer.bot**
-2. Go to **Servers / Clients → WebSocket Server**
-3. Enable the server
-4. Default: `ws://127.0.0.1:8080` (leave port **8080** unless you change it in the overlay CONFIG too)
-5. Optionally allow auto-start with Streamer.bot
+2. **Servers / Clients → WebSocket Server** → Enable
+3. Default: `ws://127.0.0.1:8080` (match overlay `CONFIG.port`)
 
-The OBS overlay connects here and listens for:
-- `General.Custom` — preferred (carries the rolled prize from `CPH.WebsocketBroadcastJson`)
-- `Twitch.RewardRedemption` — fallback / secondary (title match only; prize comes from Custom)
+## 2. Point `boxes.json` at a real path
 
-## 2. Create Channel Point Reward
+Clone or copy this repo somewhere stable, e.g.:
 
-On Twitch (Creator Dashboard → Viewer Rewards → Channel Points):
+`C:\Overlays\Twitch-Lockbox\data\boxes.json`
 
-| Setting | Value |
-|--------|--------|
-| Title | `Open Lockbox` (must match C# `REWARD_TITLE` and overlay `CONFIG.rewardTitle`) |
-| Cost | Your choice (e.g. 500–2000) |
-| Require Viewer to Enter Text | **Yes** |
-| Prompt | `Box name (dragon-cult, leaping-flame, justice, dark-omens)` |
-| Skip Reward Requests Queue | Optional (recommended for auto-fulfill after C# runs) |
+Edit `BOXES_JSON_PATH` at the top of `OpenLockbox.cs` to that absolute path.
 
-## 3. Create the Streamer.bot Action
+## 3. Create the chat commands (primary)
 
-1. **Actions** → add action, name it e.g. `Open Lockbox`
-2. **Triggers** → add **Twitch → Channel Reward Redemption** (or Reward Redemption Add)
-   - Filter / select reward: **Open Lockbox**
-3. **Sub-Actions** (order matters):
+1. **Actions** → add action named e.g. `Open Lockbox`
+2. **Triggers** → **Twitch → Chat Command** (or Commands)
+   - Command: `!lockbox`
+   - Also add `!open` (same action) if you want both
+3. **Sub-Actions** → **Core → Execute C# Code**
+   - Paste entire `OpenLockbox.cs`
+   - Compile / save
 
-### Sub-action A — Execute C# Code
-- Add **Core → Execute C# Code**
-- Paste the entire contents of `OpenLockbox.cs`
-- **Edit** `BOXES_JSON_PATH` to the absolute path of `data/boxes.json` on *this* PC
-- Optionally edit `DEFAULT_BOX_ID`, `REWARD_TITLE`, `CANCEL_ON_INVALID_BOX`
-- Compile / save (Streamer.bot should show no errors)
+### Commands viewers use
 
-### Sub-action B — (Optional) Send Message
-The C# already calls `CPH.SendMessage`. You can skip an extra Send Message, or add one that uses arguments:
+| Chat | Effect |
+|------|--------|
+| `!lockbox` | Open default box (`DEFAULT_BOX_ID`) |
+| `!lockbox dragon` | Open matching box (id / alias / partial name) |
+| `!lockbox list` | List enabled box ids |
+| `!open` / `!open justice` | Same as `!lockbox` |
 
-```
-%userName% opened %boxName% → [%prizeRarity%] %prizeName%
-```
+## 4. OBS Browser Source (animation)
 
-### Sub-action C — (Optional) Fulfill redemption
-If you did not skip the queue: add **Twitch → Reward Redemption → Fulfill** (or Complete) using `%rewardId%` / `%redemptionId%`.
+1. Sources → **Browser**
+2. Local file → `overlay/index.html` (from this repo)
+3. Width **1920**, Height **1080**
+4. Keep source active while streaming so the WebSocket stays connected
 
-## 4. Arguments set by the C# script
+**Layout test without Streamer.bot:** open `overlay/index.html?demo=1`
 
-Downstream sub-actions can use:
+**Live test:** Streamer.bot running + overlay open (no demo) → type `!lockbox` in chat → chest animation + prize reveal.
+
+## 5. Optional — Channel Points
+
+Same C# works on a Channel Point redemption:
+
+1. Reward title `Open Lockbox`, Require Text = yes (box name)
+2. Trigger: Reward Redemption → same action / Execute C#
+
+## 6. Arguments set after a successful roll
 
 | Argument | Meaning |
 |----------|---------|
-| `userName` | Viewer who redeemed |
-| `boxId` | Resolved box id |
-| `boxName` | Display name |
-| `prizeName` | Rolled item name |
-| `prizeRarity` | common / uncommon / rare / epic / legendary / mythic |
-| `prizeId` | Item id from JSON |
-| `lockboxImage` | Optional image path/URL from JSON |
+| `userName` | Viewer |
+| `boxId` / `boxName` | Resolved box |
+| `prizeName` / `prizeRarity` / `prizeId` | Rolled item |
 
-## 5. Overlay event contract
-
-After a successful roll, C# calls:
-
-```csharp
-CPH.WebsocketBroadcastJson("{ \"type\": \"lockbox.open\", ... }");
-```
-
-Clients receive this as **`General.Custom`**. Payload fields (inside `data` — see overlay `app.js`):
+## 7. Overlay event contract
 
 ```json
 {
@@ -78,27 +79,10 @@ Clients receive this as **`General.Custom`**. Payload fields (inside `data` — 
   "userName": "ViewerName",
   "boxId": "dragon-cult",
   "boxName": "Dragon Cult Lockbox",
-  "prizeId": "dc-mythic-mount",
   "prizeName": "Azure Wyrmling Mount",
   "prizeRarity": "mythic",
-  "prizeImage": "",
-  "rewardTitle": "Open Lockbox",
-  "rewardId": "...",
-  "redemptionId": "..."
+  "source": "chat"
 }
 ```
 
-**Preferred path:** overlay animates from this Custom payload (includes the real roll).  
-**RewardRedemption-only:** overlay may show a “opening…” teaser, but the prize reveal needs the Custom broadcast (or chat parse — not implemented).
-
-## 6. Test redeem
-
-1. Start Streamer.bot (WebSocket enabled)
-2. Open overlay in a browser: `overlay/index.html?demo=1` to verify animation without Twitch
-3. Remove `?demo=1`, keep Streamer.bot running, redeem **Open Lockbox** with input `dragon` or leave blank
-4. Confirm chat message + OBS overlay animation
-5. Try an invalid name → should get help text listing valid boxes (and optional cancel)
-
-## 7. Editing drop rates
-
-Edit `data/boxes.json` → change `weight` values (higher = more common). No Streamer.bot restart needed if the C# re-reads the file every redeem (it does). Reload OBS browser source only if you changed overlay files.
+Overlay listens for **`General.Custom`** and plays the animation when `type` is `lockbox.open`.

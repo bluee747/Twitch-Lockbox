@@ -1,13 +1,19 @@
 // =============================================================================
 // Neverwinter Lockbox Opener — Streamer.bot Execute C# Code (CPHInline)
 // Paste this entire file into an Execute C# Code sub-action.
-// Trigger: Twitch Channel Point Reward "Open Lockbox" (Require User Input).
+//
+// Primary trigger: Twitch chat command  !lockbox  or  !open  [box name]
+// Optional:       Channel Point Reward "Open Lockbox" (Require User Input)
+//
+// Flow: chat/redeem → roll from boxes.json → chat announce → WebsocketBroadcastJson
+//       → OBS browser source overlay plays the open animation (General.Custom)
 // =============================================================================
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -17,17 +23,19 @@ public class CPHInline
     // CUSTOMIZE THESE
     // -------------------------------------------------------------------------
     // Absolute path to boxes.json on the machine running Streamer.bot.
-    // Example Windows: @"C:\Overlays\neverwinter-lockbox-opener\data\boxes.json"
-    // Example Linux:   @"/home/streamer/neverwinter-lockbox-opener/data/boxes.json"
-    private const string BOXES_JSON_PATH = @"C:\Overlays\neverwinter-lockbox-opener\data\boxes.json";
+    // Example Windows: @"C:\Overlays\Twitch-Lockbox\data\boxes.json"
+    private const string BOXES_JSON_PATH = @"C:\Overlays\Twitch-Lockbox\data\boxes.json";
 
-    // Used when the redeem has empty user input — change to any enabled box id.
+    // Used when the command has no box argument — change to any enabled box id.
     private const string DEFAULT_BOX_ID = "dragon-cult";
 
-    // Channel Point Reward title (must match overlay CONFIG.rewardTitle).
+    // Chat command names (without !). Keep in sync with Streamer.bot Command triggers.
+    private static readonly string[] COMMAND_NAMES = { "lockbox", "open" };
+
+    // Optional channel-point title (only used in broadcast payload / overlay teaser).
     private const string REWARD_TITLE = "Open Lockbox";
 
-    // If true, cancel the redemption when the viewer names an invalid box.
+    // If true and this run came from a channel-point redeem, cancel on invalid box.
     private const bool CANCEL_ON_INVALID_BOX = true;
 
     // -------------------------------------------------------------------------
@@ -35,24 +43,20 @@ public class CPHInline
     public bool Execute()
     {
         string userName = "";
-        string rawInput = "";
         string rewardId = "";
         string redemptionId = "";
 
         CPH.TryGetArg("userName", out userName);
         if (string.IsNullOrWhiteSpace(userName))
             CPH.TryGetArg("user", out userName);
-        CPH.TryGetArg("rawInput", out rawInput);
-        if (string.IsNullOrWhiteSpace(rawInput))
-            CPH.TryGetArg("userInput", out rawInput);
         CPH.TryGetArg("rewardId", out rewardId);
         CPH.TryGetArg("redemptionId", out redemptionId);
 
         userName = (userName ?? "").Trim();
-        rawInput = (rawInput ?? "").Trim();
-
         if (string.IsNullOrWhiteSpace(userName))
             userName = "UnknownViewer";
+
+        string boxInput = ExtractBoxInput();
 
         JObject root;
         try
@@ -87,15 +91,23 @@ public class CPHInline
                 enabled.Add(b);
         }
 
-        BoxDef box = ResolveBox(enabled, rawInput);
+        // !lockbox list  /  !boxes-style help
+        if (IsListRequest(boxInput))
+        {
+            string options = string.Join(", ", enabled.Select(b => b.id));
+            CPH.SendMessage($"@{userName} Lockboxes: {options} — use !lockbox <name>");
+            return true;
+        }
+
+        BoxDef box = ResolveBox(enabled, boxInput);
 
         if (box == null)
         {
             string options = string.Join(", ", enabled.Select(b => b.displayName + " (" + b.id + ")"));
-            CPH.SendMessage($"@{userName} Unknown lockbox \"{rawInput}\". Try: {options}");
+            CPH.SendMessage($"@{userName} Unknown lockbox \"{boxInput}\". Try: {options}");
             if (CANCEL_ON_INVALID_BOX && !string.IsNullOrEmpty(redemptionId))
             {
-                try { CPH.TwitchRedemptionCancel(rewardId, redemptionId); } catch { /* older SB builds may lack this */ }
+                try { CPH.TwitchRedemptionCancel(rewardId, redemptionId); } catch { /* older SB */ }
             }
             return false;
         }
@@ -113,7 +125,6 @@ public class CPHInline
             return false;
         }
 
-        // Downstream arguments for other Streamer.bot sub-actions
         CPH.SetArgument("prizeName", prize.name);
         CPH.SetArgument("prizeRarity", prize.rarity);
         CPH.SetArgument("prizeId", prize.id ?? "");
@@ -122,11 +133,9 @@ public class CPHInline
         CPH.SetArgument("userName", userName);
         CPH.SetArgument("lockboxImage", prize.image ?? "");
 
-        string chatMsg = $"🔐 @{userName} opened a {box.displayName} and received [{prize.rarity.ToUpper()}] {prize.name}!";
-        CPH.SendMessage(chatMsg);
+        CPH.SendMessage($"🔐 @{userName} opened a {box.displayName} and received [{prize.rarity.ToUpper()}] {prize.name}!");
 
-        // Broadcast to OBS overlay via Streamer.bot WebSocket Server → General.Custom
-        // Overlay listens for type == "lockbox.open" (preferred path — includes rolled prize)
+        // OBS browser source listens for this → runs the open animation
         string payload = BuildLockboxJson(userName, box, prize, rewardId, redemptionId);
         try
         {
@@ -138,6 +147,50 @@ public class CPHInline
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Prefer Streamer.bot Command "input" / "rawInput", else strip !lockbox/!open from full message.
+    /// </summary>
+    private string ExtractBoxInput()
+    {
+        string input = "";
+        CPH.TryGetArg("input", out input);
+        if (string.IsNullOrWhiteSpace(input))
+            CPH.TryGetArg("rawInput", out input);
+        if (string.IsNullOrWhiteSpace(input))
+            CPH.TryGetArg("userInput", out input);
+
+        string message = "";
+        CPH.TryGetArg("msg", out message);
+        if (string.IsNullOrWhiteSpace(message))
+            CPH.TryGetArg("message", out message);
+
+        if (!string.IsNullOrWhiteSpace(input))
+            return input.Trim();
+
+        if (string.IsNullOrWhiteSpace(message))
+            return "";
+
+        string m = message.Trim();
+        // Strip leading !command
+        foreach (string cmd in COMMAND_NAMES)
+        {
+            var re = new Regex(@"^!" + Regex.Escape(cmd) + @"\b", RegexOptions.IgnoreCase);
+            if (re.IsMatch(m))
+            {
+                m = re.Replace(m, "", 1).Trim();
+                break;
+            }
+        }
+        return m;
+    }
+
+    private static bool IsListRequest(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return false;
+        string k = input.Trim().ToLowerInvariant();
+        return k == "list" || k == "help" || k == "boxes" || k == "?";
     }
 
     private BoxDef ResolveBox(List<BoxDef> enabled, string input)
@@ -169,7 +222,6 @@ public class CPHInline
             }
         }
 
-        // Partial / contains match (e.g. "dragon" → dragon-cult)
         foreach (BoxDef b in enabled)
         {
             if (Normalize(b.id).Contains(key) || key.Contains(Normalize(b.id)))
@@ -222,12 +274,12 @@ public class CPHInline
             ["prizeImage"] = prize.image ?? "",
             ["rewardTitle"] = REWARD_TITLE,
             ["rewardId"] = rewardId ?? "",
-            ["redemptionId"] = redemptionId ?? ""
+            ["redemptionId"] = redemptionId ?? "",
+            ["source"] = string.IsNullOrEmpty(redemptionId) ? "chat" : "channel-points"
         };
         return obj.ToString(Formatting.None);
     }
 
-    // ---- DTO shapes matching data/boxes.json ----
     public class BoxDef
     {
         public string id { get; set; }

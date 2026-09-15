@@ -1,10 +1,10 @@
 /**
  * Neverwinter Lockbox Overlay — OBS Browser Source
  *
- * Receives rolls from Streamer.bot WebSocket:
- *   1) Preferred: General.Custom with type "lockbox.open" (full prize payload)
- *   2) Secondary: Twitch.RewardRedemption matching CONFIG.rewardTitle
- *      (teaser only unless prize fields are somehow present)
+ * Streamer.bot listens to chat (!lockbox / !open). After a roll it broadcasts
+ * JSON; this page only listens on the WebSocket and plays the animation:
+ *   1) Preferred: General.Custom with type "lockbox.open" (full prize)
+ *   2) Optional: Twitch.RewardRedemption teaser if you also use channel points
  *
  * Demo: open with ?demo=1 to play a fake open without Streamer.bot.
  */
@@ -18,7 +18,7 @@
   const CONFIG = {
     host: '127.0.0.1',
     port: 8080,
-    // Must match Twitch reward title + OpenLockbox.cs REWARD_TITLE
+    // Only used for optional channel-point teaser; chat opens use Custom
     rewardTitle: 'Open Lockbox',
     // How long the reveal stays on screen (ms)
     displayMs: 9000,
