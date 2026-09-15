@@ -1,0 +1,81 @@
+{
+  "_meta": {
+    "note": "Rates are approximate streamer-editable stand-ins for entertainment overlays — NOT official Cryptic Studios / Neverwinter drop tables. Edit weights freely for your channel.",
+    "version": "1.0.0",
+    "rarityOrder": ["common", "uncommon", "rare", "epic", "legendary", "mythic"]
+  },
+  "boxes": [
+    {
+      "id": "dragon-cult",
+      "displayName": "Dragon Cult Lockbox",
+      "aliases": ["dragon", "dragoncult", "dragon-cult", "cult", "dc"],
+      "enabled": true,
+      "items": [
+        { "id": "dc-coins", "name": "Rough Astral Diamonds", "rarity": "common", "weight": 320, "image": null },
+        { "id": "dc-enchant-t1", "name": "Lesser Dragon Cult Enchantment", "rarity": "common", "weight": 220, "image": null },
+        { "id": "dc-rp", "name": "Refinement Points Cache", "rarity": "uncommon", "weight": 160, "image": null },
+        { "id": "dc-companion-token", "name": "Companion Upgrade Token", "rarity": "uncommon", "weight": 100, "image": null },
+        { "id": "dc-mount-pack", "name": "Mount Training Manual", "rarity": "rare", "weight": 80, "image": null },
+        { "id": "dc-fashion", "name": "Cult Initiate Fashion Pack", "rarity": "rare", "weight": 55, "image": null },
+        { "id": "dc-epic-enchant", "name": "Greater Dragon Cult Enchantment", "rarity": "epic", "weight": 35, "image": null },
+        { "id": "dc-legendary-weapon", "name": "Cultist's Ruinous Blade (Account)", "rarity": "legendary", "weight": 18, "image": null },
+        { "id": "dc-mythic-mount", "name": "Azure Wyrmling Mount", "rarity": "mythic", "weight": 8, "image": null },
+        { "id": "dc-chase-companion", "name": "Tiamat's Chosen Companion", "rarity": "mythic", "weight": 4, "image": null }
+      ]
+    },
+    {
+      "id": "leaping-flame",
+      "displayName": "Leaping Flame Lockbox",
+      "aliases": ["leaping", "flame", "leapingflame", "leaping-flame", "lf", "fire"],
+      "enabled": true,
+      "items": [
+        { "id": "lf-coins", "name": "Rough Astral Diamonds", "rarity": "common", "weight": 300, "image": null },
+        { "id": "lf-embers", "name": "Cinder Embers Bundle", "rarity": "common", "weight": 200, "image": null },
+        { "id": "lf-rp", "name": "Refinement Points Cache", "rarity": "uncommon", "weight": 150, "image": null },
+        { "id": "lf-torch", "name": "Eternal Torch Decoration", "rarity": "uncommon", "weight": 110, "image": null },
+        { "id": "lf-enchant", "name": "Flameward Enchantment", "rarity": "rare", "weight": 90, "image": null },
+        { "id": "lf-fashion", "name": "Ember Dancer Fashion Pack", "rarity": "rare", "weight": 60, "image": null },
+        { "id": "lf-epic-mount-token", "name": "Rare Mount Choice Pack", "rarity": "epic", "weight": 40, "image": null },
+        { "id": "lf-legendary", "name": "Phoenix-Touched Artifact Set Piece", "rarity": "legendary", "weight": 30, "image": null },
+        { "id": "lf-mythic-mount", "name": "Leaping Flame Courser", "rarity": "mythic", "weight": 15, "image": null },
+        { "id": "lf-chase", "name": "Inferno Drake Mount", "rarity": "mythic", "weight": 5, "image": null }
+      ]
+    },
+    {
+      "id": "justice",
+      "displayName": "Lockbox of Justice",
+      "aliases": ["justice", "loj", "order", "law"],
+      "enabled": true,
+      "items": [
+        { "id": "j-coins", "name": "Rough Astral Diamonds", "rarity": "common", "weight": 280, "image": null },
+        { "id": "j-scales", "name": "Scales of Judgment (RP)", "rarity": "common", "weight": 180, "image": null },
+        { "id": "j-seal", "name": "Seal of the Protector", "rarity": "uncommon", "weight": 140, "image": null },
+        { "id": "j-enchant", "name": "Justicar's Enchantment", "rarity": "uncommon", "weight": 120, "image": null },
+        { "id": "j-armor-pack", "name": "Knight of Neverwinter Pack", "rarity": "rare", "weight": 95, "image": null },
+        { "id": "j-title", "name": "Title: Defender of the City", "rarity": "rare", "weight": 70, "image": null },
+        { "id": "j-epic-weapon", "name": "Hammer of Absolute Law", "rarity": "epic", "weight": 50, "image": null },
+        { "id": "j-legendary-companion", "name": "Celestial Lion Companion", "rarity": "legendary", "weight": 35, "image": null },
+        { "id": "j-mythic-mount", "name": "Griffon of Tyr Mount", "rarity": "mythic", "weight": 22, "image": null },
+        { "id": "j-chase", "name": "Avatar of Justice Cosmetic Set", "rarity": "mythic", "weight": 8, "image": null }
+      ]
+    },
+    {
+      "id": "dark-omens",
+      "displayName": "Dark Omens Lockbox",
+      "aliases": ["dark", "omens", "darkomens", "dark-omens", "do", "omen"],
+      "enabled": true,
+      "items": [
+        { "id": "do-coins", "name": "Rough Astral Diamonds", "rarity": "common", "weight": 310, "image": null },
+        { "id": "do-shards", "name": "Omen Shards Bundle", "rarity": "common", "weight": 210, "image": null },
+        { "id": "do-rp", "name": "Refinement Points Cache", "rarity": "uncommon", "weight": 155, "image": null },
+        { "id": "do-curse-ward", "name": "Curseward Charm", "rarity": "uncommon", "weight": 105, "image": null },
+        { "id": "do-enchant", "name": "Shadowed Enchantment", "rarity": "rare", "weight": 85, "image": null },
+        { "id": "do-fashion", "name": "Nightseer Fashion Pack", "rarity": "rare", "weight": 58, "image": null },
+        { "id": "do-epic", "name": "Umbral Artifact Choice Pack", "rarity": "epic", "weight": 38, "image": null },
+        { "id": "do-legendary", "name": "Blade of Whispered Doom", "rarity": "legendary", "weight": 22, "image": null },
+        { "id": "do-mythic-companion", "name": "Shade of Shar Companion", "rarity": "mythic", "weight": 12, "image": null },
+        { "id": "do-chase", "name": "Nightmare Steed Mount", "rarity": "mythic", "weight": 5, "image": null }
+      ]
+    }
+  ]
+}
