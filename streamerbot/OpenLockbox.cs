@@ -1,44 +1,22 @@
-// =============================================================================
+﻿// =============================================================================
 // Neverwinter Lockbox Opener — Streamer.bot Execute C# Code (CPHInline)
-// Paste this entire file into an Execute C# Code sub-action.
-//
-// Primary trigger: Twitch chat command  !lockbox  or  !open  [box name]
-// Optional:       Channel Point Reward "Open Lockbox" (Require User Input)
-//
-// Flow: chat/redeem → roll from boxes.json → chat announce → WebsocketBroadcastJson
-//       → OBS browser source overlay plays the open animation (General.Custom)
+// Chat: !lockbox / !open [box name]
+// No System.Linq / Regex — works with default Streamer.bot references.
 // =============================================================================
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public class CPHInline
 {
-    // -------------------------------------------------------------------------
-    // CUSTOMIZE THESE
-    // -------------------------------------------------------------------------
-    // Absolute path to boxes.json on the machine running Streamer.bot.
-    // Example Windows: @"C:\Overlays\Twitch-Lockbox\data\boxes.json"
-    private const string BOXES_JSON_PATH = @"C:\Overlays\Twitch-Lockbox\data\boxes.json";
-
-    // Used when the command has no box argument — change to any enabled box id.
+    private const string BOXES_JSON_PATH = @"D:\Overlays\Twitch-Lockbox\data\boxes.json";
     private const string DEFAULT_BOX_ID = "dragon-cult";
-
-    // Chat command names (without !). Keep in sync with Streamer.bot Command triggers.
     private static readonly string[] COMMAND_NAMES = { "lockbox", "open" };
-
-    // Optional channel-point title (only used in broadcast payload / overlay teaser).
     private const string REWARD_TITLE = "Open Lockbox";
-
-    // If true and this run came from a channel-point redeem, cancel on invalid box.
     private const bool CANCEL_ON_INVALID_BOX = true;
-
-    // -------------------------------------------------------------------------
 
     public bool Execute()
     {
@@ -63,7 +41,7 @@ public class CPHInline
         {
             if (!File.Exists(BOXES_JSON_PATH))
             {
-                CPH.SendMessage($"[Lockbox] boxes.json not found at: {BOXES_JSON_PATH} — edit BOXES_JSON_PATH in OpenLockbox.cs");
+                CPH.SendMessage("[Lockbox] boxes.json not found at: " + BOXES_JSON_PATH + " — edit BOXES_JSON_PATH in OpenLockbox.cs");
                 return false;
             }
             string json = File.ReadAllText(BOXES_JSON_PATH, Encoding.UTF8);
@@ -91,11 +69,9 @@ public class CPHInline
                 enabled.Add(b);
         }
 
-        // !lockbox list  /  !boxes-style help
         if (IsListRequest(boxInput))
         {
-            string options = string.Join(", ", enabled.Select(b => b.id));
-            CPH.SendMessage($"@{userName} Lockboxes: {options} — use !lockbox <name>");
+            CPH.SendMessage("@" + userName + " Lockboxes: " + JoinBoxIds(enabled) + " — use !lockbox <name>");
             return true;
         }
 
@@ -103,18 +79,17 @@ public class CPHInline
 
         if (box == null)
         {
-            string options = string.Join(", ", enabled.Select(b => b.displayName + " (" + b.id + ")"));
-            CPH.SendMessage($"@{userName} Unknown lockbox \"{boxInput}\". Try: {options}");
+            CPH.SendMessage("@" + userName + " Unknown lockbox \"" + boxInput + "\". Try: " + JoinBoxLabels(enabled));
             if (CANCEL_ON_INVALID_BOX && !string.IsNullOrEmpty(redemptionId))
             {
-                try { CPH.TwitchRedemptionCancel(rewardId, redemptionId); } catch { /* older SB */ }
+                try { CPH.TwitchRedemptionCancel(rewardId, redemptionId); } catch { }
             }
             return false;
         }
 
         if (box.items == null || box.items.Count == 0)
         {
-            CPH.SendMessage($"[Lockbox] Box \"{box.displayName}\" has no items configured.");
+            CPH.SendMessage("[Lockbox] Box \"" + box.displayName + "\" has no items configured.");
             return false;
         }
 
@@ -133,9 +108,8 @@ public class CPHInline
         CPH.SetArgument("userName", userName);
         CPH.SetArgument("lockboxImage", prize.image ?? "");
 
-        CPH.SendMessage($"🔐 @{userName} opened a {box.displayName} and received [{prize.rarity.ToUpper()}] {prize.name}!");
+        CPH.SendMessage("🔐 @" + userName + " opened a " + box.displayName + " and received [" + (prize.rarity ?? "").ToUpper() + "] " + prize.name + "!");
 
-        // OBS browser source listens for this → runs the open animation
         string payload = BuildLockboxJson(userName, box, prize, rewardId, redemptionId);
         try
         {
@@ -149,9 +123,6 @@ public class CPHInline
         return true;
     }
 
-    /// <summary>
-    /// Prefer Streamer.bot Command "input" / "rawInput", else strip !lockbox/!open from full message.
-    /// </summary>
     private string ExtractBoxInput()
     {
         string input = "";
@@ -173,15 +144,14 @@ public class CPHInline
             return "";
 
         string m = message.Trim();
-        // Strip leading !command
-        foreach (string cmd in COMMAND_NAMES)
+        string lower = m.ToLowerInvariant();
+        for (int i = 0; i < COMMAND_NAMES.Length; i++)
         {
-            var re = new Regex(@"^!" + Regex.Escape(cmd) + @"\b", RegexOptions.IgnoreCase);
-            if (re.IsMatch(m))
-            {
-                m = re.Replace(m, "", 1).Trim();
-                break;
-            }
+            string cmd = "!" + COMMAND_NAMES[i].ToLowerInvariant();
+            if (lower == cmd)
+                return "";
+            if (lower.StartsWith(cmd + " "))
+                return m.Substring(cmd.Length).Trim();
         }
         return m;
     }
@@ -193,6 +163,31 @@ public class CPHInline
         return k == "list" || k == "help" || k == "boxes" || k == "?";
     }
 
+    private static string JoinBoxIds(List<BoxDef> enabled)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < enabled.Count; i++)
+        {
+            if (i > 0) sb.Append(", ");
+            sb.Append(enabled[i].id);
+        }
+        return sb.ToString();
+    }
+
+    private static string JoinBoxLabels(List<BoxDef> enabled)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < enabled.Count; i++)
+        {
+            if (i > 0) sb.Append(", ");
+            sb.Append(enabled[i].displayName);
+            sb.Append(" (");
+            sb.Append(enabled[i].id);
+            sb.Append(")");
+        }
+        return sb.ToString();
+    }
+
     private BoxDef ResolveBox(List<BoxDef> enabled, string input)
     {
         if (enabled == null || enabled.Count == 0)
@@ -200,36 +195,46 @@ public class CPHInline
 
         if (string.IsNullOrWhiteSpace(input))
         {
-            BoxDef byDefault = enabled.FirstOrDefault(b =>
-                string.Equals(b.id, DEFAULT_BOX_ID, StringComparison.OrdinalIgnoreCase));
-            return byDefault ?? enabled[0];
+            for (int i = 0; i < enabled.Count; i++)
+            {
+                if (string.Equals(enabled[i].id, DEFAULT_BOX_ID, StringComparison.OrdinalIgnoreCase))
+                    return enabled[i];
+            }
+            return enabled[0];
         }
 
         string key = Normalize(input);
-        foreach (BoxDef b in enabled)
+
+        for (int i = 0; i < enabled.Count; i++)
         {
-            if (Normalize(b.id) == key)
-                return b;
-            if (Normalize(b.displayName) == key)
-                return b;
+            BoxDef b = enabled[i];
+            if (Normalize(b.id) == key) return b;
+            if (Normalize(b.displayName) == key) return b;
             if (b.aliases != null)
             {
-                foreach (string a in b.aliases)
+                for (int a = 0; a < b.aliases.Count; a++)
                 {
-                    if (Normalize(a) == key)
-                        return b;
+                    if (Normalize(b.aliases[a]) == key) return b;
                 }
             }
         }
 
-        foreach (BoxDef b in enabled)
+        for (int i = 0; i < enabled.Count; i++)
         {
-            if (Normalize(b.id).Contains(key) || key.Contains(Normalize(b.id)))
+            BoxDef b = enabled[i];
+            string nid = Normalize(b.id);
+            string ndn = Normalize(b.displayName);
+            if (nid.Contains(key) || key.Contains(nid) || ndn.Contains(key))
                 return b;
-            if (Normalize(b.displayName).Contains(key))
-                return b;
-            if (b.aliases != null && b.aliases.Any(a => Normalize(a).Contains(key) || key.Contains(Normalize(a))))
-                return b;
+            if (b.aliases != null)
+            {
+                for (int a = 0; a < b.aliases.Count; a++)
+                {
+                    string na = Normalize(b.aliases[a]);
+                    if (na.Contains(key) || key.Contains(na))
+                        return b;
+                }
+            }
         }
 
         return null;
@@ -238,24 +243,40 @@ public class CPHInline
     private static string Normalize(string s)
     {
         if (string.IsNullOrEmpty(s)) return "";
-        return new string(s.ToLowerInvariant()
-            .Where(c => !char.IsWhiteSpace(c) && c != '-' && c != '_' && c != '\'')
-            .ToArray());
+        StringBuilder sb = new StringBuilder();
+        string lower = s.ToLowerInvariant();
+        for (int i = 0; i < lower.Length; i++)
+        {
+            char c = lower[i];
+            if (char.IsWhiteSpace(c) || c == '-' || c == '_' || c == '\'')
+                continue;
+            sb.Append(c);
+        }
+        return sb.ToString();
     }
 
     private ItemDef WeightedRoll(List<ItemDef> items)
     {
-        var valid = items.Where(i => i != null && i.weight > 0).ToList();
-        if (valid.Count == 0) return null;
+        List<ItemDef> valid = new List<ItemDef>();
+        int total = 0;
+        for (int i = 0; i < items.Count; i++)
+        {
+            ItemDef it = items[i];
+            if (it != null && it.weight > 0)
+            {
+                valid.Add(it);
+                total += it.weight;
+            }
+        }
+        if (valid.Count == 0 || total <= 0) return null;
 
-        int total = valid.Sum(i => i.weight);
         int roll = new Random().Next(0, total);
         int cumulative = 0;
-        foreach (ItemDef item in valid)
+        for (int i = 0; i < valid.Count; i++)
         {
-            cumulative += item.weight;
+            cumulative += valid[i].weight;
             if (roll < cumulative)
-                return item;
+                return valid[i];
         }
         return valid[valid.Count - 1];
     }
