@@ -1,53 +1,39 @@
-/**
- * Neverwinter Lockbox Overlay — OBS Browser Source
- *
- * Streamer.bot listens to chat (!lockbox / !open). After a roll it broadcasts
- * JSON; this page only listens on the WebSocket and plays the animation:
- *   1) Preferred: General.Custom with type "lockbox.open" (full prize)
- *   2) Optional: Twitch.RewardRedemption teaser if you also use channel points
- *
- * Demo: open with ?demo=1 to play a fake open without Streamer.bot.
+﻿/**
+ * Neverwinter Lockbox Overlay — OBS / Streamlabs Browser Source
+ * Native WebSocket to Streamer.bot (no CDN) — works with file:// sources.
+ * Listens for General.Custom from CPH.WebsocketBroadcastJson (type lockbox.open)
+ * Demo: ?demo=1
  */
-
 (function () {
   'use strict';
 
-  // ===========================================================================
-  // CUSTOMIZE
-  // ===========================================================================
-  const CONFIG = {
+  var CONFIG = {
     host: '127.0.0.1',
     port: 8080,
-    // Only used for optional channel-point teaser; chat opens use Custom
-    rewardTitle: 'Open Lockbox',
-    // How long the reveal stays on screen (ms)
+    endpoint: '/',
     displayMs: 9000,
-    // Delay after chest opens before prize text appears
     revealDelayMs: 650,
-    // Show tiny connection status in corner (set false for clean OBS)
     showStatus: true,
+    reconnectMs: 2000
   };
 
-  // ===========================================================================
+  var stage = document.getElementById('stage');
+  var glowRing = document.getElementById('glowRing');
+  var viewerEl = document.getElementById('viewerName');
+  var boxEl = document.getElementById('boxName');
+  var prizeEl = document.getElementById('prizeName');
+  var rarityEl = document.getElementById('rarityBadge');
+  var statusEl = document.getElementById('status');
 
-  const stage = document.getElementById('stage');
-  const glowRing = document.getElementById('glowRing');
-  const viewerEl = document.getElementById('viewerName');
-  const boxEl = document.getElementById('boxName');
-  const prizeEl = document.getElementById('prizeName');
-  const rarityEl = document.getElementById('rarityBadge');
-  const statusEl = document.getElementById('status');
-  const prizePanel = document.getElementById('prizePanel');
+  var hideTimer = null;
+  var busy = false;
+  var ws = null;
+  var reconnectTimer = null;
 
-  let hideTimer = null;
-  let busy = false;
-  let client = null;
-
-  const params = new URLSearchParams(window.location.search);
-  const demoMode = params.get('demo') === '1' || params.get('demo') === 'true';
+  var params = new URLSearchParams(window.location.search);
+  var demoMode = params.get('demo') === '1' || params.get('demo') === 'true';
   if (params.has('host')) CONFIG.host = params.get('host');
   if (params.has('port')) CONFIG.port = parseInt(params.get('port'), 10) || CONFIG.port;
-  if (params.has('displayMs')) CONFIG.displayMs = parseInt(params.get('displayMs'), 10) || CONFIG.displayMs;
 
   function setStatus(text, cls) {
     if (!CONFIG.showStatus || !statusEl) return;
@@ -56,40 +42,31 @@
   }
 
   function normalizeRarity(r) {
-    const s = (r || 'common').toLowerCase().trim();
-    const allowed = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'];
-    return allowed.includes(s) ? s : 'common';
+    var s = (r || 'common').toLowerCase().trim();
+    var allowed = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'];
+    return allowed.indexOf(s) >= 0 ? s : 'common';
   }
 
-  /**
-   * @param {{ userName: string, boxName: string, prizeName: string, prizeRarity: string }} data
-   */
   function playOpen(data) {
     if (!data) return;
     if (busy) {
-      // Queue-simple: restart with latest
       clearTimeout(hideTimer);
-      resetStageImmediate();
+      stage.className = 'stage hidden';
+      busy = false;
     }
     busy = true;
 
-    const rarity = normalizeRarity(data.prizeRarity);
-    const userName = data.userName || 'Viewer';
-    const boxName = data.boxName || 'Lockbox';
-    const prizeName = data.prizeName || 'Unknown Prize';
-
-    viewerEl.textContent = userName;
-    boxEl.textContent = boxName;
-    prizeEl.textContent = prizeName;
+    var rarity = normalizeRarity(data.prizeRarity);
+    viewerEl.textContent = data.userName || 'Viewer';
+    boxEl.textContent = data.boxName || 'Lockbox';
+    prizeEl.textContent = data.prizeName || 'Unknown Prize';
     rarityEl.textContent = rarity.toUpperCase();
 
-    // Reset classes
     stage.className = 'stage';
     glowRing.className = 'glow-ring rarity-' + rarity;
     rarityEl.className = 'rarity-badge rarity-' + rarity;
     prizeEl.className = 'prize-name rarity-' + rarity;
 
-    // Force reflow then animate
     void stage.offsetWidth;
     stage.classList.add('visible');
     stage.classList.remove('hidden');
@@ -100,178 +77,127 @@
     }, CONFIG.revealDelayMs);
 
     clearTimeout(hideTimer);
-    hideTimer = setTimeout(hideStage, CONFIG.displayMs);
+    hideTimer = setTimeout(function () {
+      stage.classList.remove('visible', 'opening', 'revealed');
+      stage.classList.add('hidden');
+      busy = false;
+    }, CONFIG.displayMs);
   }
 
-  /** Teaser when we only saw RewardRedemption (no rolled prize yet). */
-  function playTeaser(userName, userInput) {
-    if (busy) return;
-    viewerEl.textContent = userName || 'Viewer';
-    boxEl.textContent = userInput || 'a Lockbox';
-    prizeEl.textContent = '…';
-    rarityEl.textContent = 'OPENING';
-    rarityEl.className = 'rarity-badge';
-    prizeEl.className = 'prize-name';
-    glowRing.className = 'glow-ring';
+  function extractLockboxPayload(msg) {
+    if (!msg) return null;
+    var obj = msg;
+    if (typeof obj === 'string') {
+      try { obj = JSON.parse(obj); } catch (e) { return null; }
+    }
 
-    stage.className = 'stage visible teaser';
-    // Auto-clear teaser if Custom never arrives
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(hideStage, 4000);
+    // Event wrapper from Streamer.bot
+    var source = obj.event && obj.event.source;
+    var type = obj.event && obj.event.type;
+    var data = obj.data;
+
+    if (source && String(source).toLowerCase() === 'general' && type === 'Custom') {
+      return coercePayload(data);
+    }
+
+    // Direct payload
+    return coercePayload(obj);
   }
 
-  function hideStage() {
-    stage.classList.remove('visible', 'opening', 'revealed', 'teaser');
-    stage.classList.add('hidden');
-    busy = false;
-  }
-
-  function resetStageImmediate() {
-    stage.className = 'stage hidden';
-    busy = false;
-  }
-
-  /** Extract lockbox.open payload from General.Custom event shapes. */
-  function extractCustomPayload(eventData) {
-    // @streamerbot/client typically: { event: {...}, data: { ...broadcast fields } }
-    const d = eventData && (eventData.data !== undefined ? eventData.data : eventData);
-    if (!d) return null;
-
-    // WebsocketBroadcastJson may land as object or nested string
-    let payload = d;
-    if (typeof d === 'string') {
-      try { payload = JSON.parse(d); } catch (e) { return null; }
+  function coercePayload(data) {
+    if (data == null) return null;
+    if (typeof data === 'string') {
+      try { data = JSON.parse(data); } catch (e) { return null; }
     }
-    // Some builds nest under .data again or .message
-    if (payload && typeof payload.data === 'string') {
-      try { payload = JSON.parse(payload.data); } catch (e) { /* keep */ }
+    // Nested shapes
+    if (data && typeof data.data === 'string') {
+      try { data = JSON.parse(data.data); } catch (e) { /* keep */ }
     }
-    if (payload && payload.data && typeof payload.data === 'object' && payload.data.type) {
-      payload = payload.data;
+    if (data && data.data && typeof data.data === 'object' && (data.data.type || data.data.prizeName)) {
+      data = data.data;
     }
-    if (payload && payload.message && typeof payload.message === 'object') {
-      payload = payload.message;
-    }
-
-    if (payload && payload.type === 'lockbox.open') return payload;
-    // Also accept if fields are present without type (defensive)
-    if (payload && payload.prizeName && (payload.boxName || payload.boxId)) {
-      payload.type = payload.type || 'lockbox.open';
-      return payload;
+    if (!data || typeof data !== 'object') return null;
+    if (data.type === 'lockbox.open' || (data.prizeName && (data.boxName || data.boxId))) {
+      return data;
     }
     return null;
   }
 
-  function onCustomEvent(eventData) {
-    const payload = extractCustomPayload(eventData);
-    if (!payload) return;
-    playOpen({
-      userName: payload.userName,
-      boxName: payload.boxName || payload.boxId,
-      prizeName: payload.prizeName,
-      prizeRarity: payload.prizeRarity,
-    });
+  function handleMessage(raw) {
+    var msg;
+    try {
+      msg = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch (e) {
+      return;
+    }
+    // Ignore request responses
+    if (msg.status && msg.id && !msg.event) return;
+
+    var payload = extractLockboxPayload(msg);
+    if (payload) {
+      setStatus('Lockbox open!', 'ok');
+      playOpen({
+        userName: payload.userName,
+        boxName: payload.boxName || payload.boxId,
+        prizeName: payload.prizeName,
+        prizeRarity: payload.prizeRarity
+      });
+    }
   }
 
-  function onRewardRedemption(eventData) {
-    const d = (eventData && eventData.data) || eventData || {};
-    const title =
-      d.rewardTitle ||
-      d.reward_title ||
-      d.title ||
-      (d.reward && (d.reward.title || d.reward.Title)) ||
-      '';
-    if (!title || title.toLowerCase() !== CONFIG.rewardTitle.toLowerCase()) return;
-
-    const userName =
-      d.user_name || d.userName || d.displayName || d.login ||
-      (d.user && (d.user.name || d.user.display_name)) || 'Viewer';
-    const userInput = d.user_input || d.userInput || d.rawInput || d.input || '';
-
-    // Prefer waiting for Custom for the real prize. Show brief teaser only.
-    // If Custom already fired first, busy will block teaser.
-    playTeaser(userName, userInput);
-  }
-
-  function connectStreamerBot() {
-    if (typeof window.StreamerbotClient !== 'function') {
-      setStatus('Waiting for @streamerbot/client…', '');
-      window.addEventListener('sb-client-ready', connectStreamerBot, { once: true });
-      // Fallback poll
-      setTimeout(function () {
-        if (!client && typeof window.StreamerbotClient === 'function') connectStreamerBot();
-      }, 1500);
+  function connect() {
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+    var url = 'ws://' + CONFIG.host + ':' + CONFIG.port + (CONFIG.endpoint || '/');
+    setStatus('Connecting ' + url + '…', '');
+    try {
+      ws = new WebSocket(url);
+    } catch (e) {
+      setStatus('WS create failed', 'error');
+      scheduleReconnect();
       return;
     }
 
-    setStatus('Connecting ' + CONFIG.host + ':' + CONFIG.port + '…', '');
+    ws.onopen = function () {
+      setStatus('WS connected — subscribing…', 'ok');
+      var sub = {
+        request: 'Subscribe',
+        id: 'lockbox-sub-' + Date.now(),
+        events: { General: ['Custom'] }
+      };
+      ws.send(JSON.stringify(sub));
+      setStatus('WS connected', 'ok');
+    };
 
-    try {
-      client = new window.StreamerbotClient({
-        host: CONFIG.host,
-        port: CONFIG.port,
-        // Subscribe to sources we need
-        subscriptions: {
-          General: ['Custom'],
-          Twitch: ['RewardRedemption'],
-        },
-        onConnect: function () {
-          setStatus('WS connected', 'ok');
-        },
-        onDisconnect: function () {
-          setStatus('WS disconnected — retrying…', 'error');
-        },
-        onError: function (err) {
-          setStatus('WS error', 'error');
-          console.warn('[lockbox overlay] WS error', err);
-        },
-      });
+    ws.onmessage = function (ev) {
+      handleMessage(ev.data);
+    };
 
-      // Preferred: rolled prize broadcast from OpenLockbox.cs
-      client.on('General.Custom', onCustomEvent);
+    ws.onerror = function () {
+      setStatus('WS error', 'error');
+    };
 
-      // Secondary: teaser on redeem (prize comes from Custom)
-      client.on('Twitch.RewardRedemption', onRewardRedemption);
+    ws.onclose = function () {
+      setStatus('WS disconnected — retrying…', 'error');
+      scheduleReconnect();
+    };
+  }
 
-      // Some client versions use wildcard / raw message — belt and suspenders
-      if (typeof client.on === 'function') {
-        try {
-          client.on('*', function (ev, data) {
-            // Ignore unless it looks like our payload
-            const p = extractCustomPayload(data);
-            if (p) onCustomEvent(data);
-          });
-        } catch (e) { /* optional */ }
-      }
-    } catch (err) {
-      setStatus('Client init failed', 'error');
-      console.error(err);
-    }
+  function scheduleReconnect() {
+    if (reconnectTimer) return;
+    reconnectTimer = setTimeout(connect, CONFIG.reconnectMs);
   }
 
   function runDemo() {
     setStatus('DEMO MODE (?demo=1)', 'ok');
-    const demos = [
-      {
-        userName: 'DemoKnight',
-        boxName: 'Dragon Cult Lockbox',
-        prizeName: 'Azure Wyrmling Mount',
-        prizeRarity: 'mythic',
-      },
-      {
-        userName: 'ScrollHoarder',
-        boxName: 'Leaping Flame Lockbox',
-        prizeName: 'Rough Astral Diamonds',
-        prizeRarity: 'common',
-      },
-      {
-        userName: 'JusticarJay',
-        boxName: 'Lockbox of Justice',
-        prizeName: 'Hammer of Absolute Law',
-        prizeRarity: 'epic',
-      },
+    var demos = [
+      { userName: 'DemoKnight', boxName: 'Dragon Cult Lockbox', prizeName: 'Azure Wyrmling Mount', prizeRarity: 'mythic' },
+      { userName: 'ScrollHoarder', boxName: 'Leaping Flame Lockbox', prizeName: 'Rough Astral Diamonds', prizeRarity: 'common' },
+      { userName: 'JusticarJay', boxName: 'Lockbox of Justice', prizeName: 'Hammer of Absolute Law', prizeRarity: 'epic' }
     ];
-    let i = 0;
+    var i = 0;
     function next() {
       playOpen(demos[i % demos.length]);
       i += 1;
@@ -280,11 +206,10 @@
     setTimeout(next, 800);
   }
 
-  // Boot
   stage.classList.add('hidden');
   if (demoMode) {
     runDemo();
   } else {
-    connectStreamerBot();
+    connect();
   }
 })();
