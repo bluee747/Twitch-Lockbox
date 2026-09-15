@@ -1,14 +1,16 @@
-# Streamer.bot wire-up — chat command → overlay animation
+# Streamer.bot wire-up — Channel Points → overlay animation
 
 ## How it works
 
-1. Viewer types in chat: `!lockbox` or `!lockbox dragon`
-2. Streamer.bot Command trigger runs **Execute C# Code** (`OpenLockbox.cs`)
-3. C# rolls loot from `data/boxes.json`, announces in chat
-4. C# calls `CPH.WebsocketBroadcastJson` with `{ "type": "lockbox.open", ... }`
-5. OBS **Browser Source** (`overlay/index.html`) is connected to Streamer.bot’s WebSocket Server and plays the open animation
+1. Viewer redeems Channel Points reward **Open Lockbox** (100 pts; optional text = box name/alias)
+2. Streamer.bot Reward Redemption trigger runs **Execute C# Code** (`OpenLockbox.cs`)
+3. C# rolls loot from `data/boxes.json`, appends to `data/inventory.json`, announces in chat
+4. C# calls `CPH.WebsocketBroadcastJson` with `{ "type": "lockbox.open", "icon", "prizeId", "inventoryCount", ... }`
+5. OBS **Browser Source** (`overlay/index.html`) plays the chest open + prize reveal
 
-The overlay does **not** parse chat itself. Streamer.bot listens to chat; the browser source only listens for the broadcast.
+**Free `!lockbox` / `!open` chat opens are disabled.** Opening is Channel Points only.
+
+Optional: free chat command `!inventory` → `ShowInventory.cs` (view recent prizes only).
 
 ---
 
@@ -18,58 +20,66 @@ The overlay does **not** parse chat itself. Streamer.bot listens to chat; the br
 2. **Servers / Clients → WebSocket Server** → Enable
 3. Default: `ws://127.0.0.1:8080` (match overlay `CONFIG.port`)
 
-## 2. Point `boxes.json` at a real path
+## 2. Point JSON paths at the PC install
 
-Clone or copy this repo somewhere stable, e.g.:
+Repo path on streamer PC:
 
-`C:\Overlays\Twitch-Lockbox\data\boxes.json`
+`D:\Overlays\Twitch-Lockbox\`
 
-Edit `BOXES_JSON_PATH` at the top of `OpenLockbox.cs` to that absolute path.
+Constants at the top of both C# files:
 
-## 3. Create the chat commands (primary)
+| Constant | Default |
+|----------|---------|
+| `BOXES_JSON_PATH` | `D:\Overlays\Twitch-Lockbox\data\boxes.json` |
+| `INVENTORY_JSON_PATH` | `D:\Overlays\Twitch-Lockbox\data\inventory.json` |
 
-1. **Actions** → add action named e.g. `Open Lockbox`
-2. **Triggers** → **Twitch → Chat Command** (or Commands)
-   - Command: `!lockbox`
-   - Also add `!open` (same action) if you want both
-3. **Sub-Actions** → **Core → Execute C# Code**
-   - Paste entire `OpenLockbox.cs`
-   - Compile / save
+## 3. Channel Points reward (required for opens)
 
-### Commands viewers use
+1. Twitch → Channel Points → create **Open Lockbox** (e.g. 100 pts)
+2. **Require Viewer to Enter Text** = Yes (box id / alias, or blank for default `wild-adventures`)
+3. Use `assets/open-lockbox-reward.png` (or the 112/56/28 variants) as the reward icon
+4. In Streamer.bot: **Actions** → `Open Lockbox`
+5. **Triggers** → **Twitch → Channel Point Redemption** → reward **Open Lockbox**
+6. **Sub-Actions** → **Core → Execute C# Code** → paste entire `OpenLockbox.cs` → compile / save
 
-| Chat | Effect |
+Do **not** attach chat commands `!lockbox` / `!open` to this action.
+
+### Reward text examples
+
+| Text | Effect |
 |------|--------|
-| `!lockbox` | Open default box (`DEFAULT_BOX_ID`) |
-| `!lockbox dragon` | Open matching box (id / alias / partial name) |
-| `!lockbox list` | List enabled box ids |
-| `!open` / `!open justice` | Same as `!lockbox` |
+| *(empty)* | Default box (`DEFAULT_BOX_ID` = `wild-adventures`) |
+| `dragon` / `dragon-cult` | Dragon Cult Lockbox |
+| `list` | List enabled box ids (no open / no charge cancel if configured) |
 
-## 4. OBS Browser Source (animation)
+## 4. Optional — `!inventory` (view only)
+
+1. **Actions** → add action e.g. `Show Lockbox Inventory`
+2. **Triggers** → **Command Triggered** / Chat Command `!inventory`
+3. **Sub-Actions** → Execute C# Code → paste `ShowInventory.cs` only
+4. Does **not** open boxes or spend points
+
+## 5. OBS Browser Source (animation)
 
 1. Sources → **Browser**
-2. Local file → `overlay/index.html` (from this repo)
+2. Local file → `D:\Overlays\Twitch-Lockbox\overlay\index.html`
 3. Width **1920**, Height **1080**
 4. Keep source active while streaming so the WebSocket stays connected
+5. After pulling updates: **Refresh cache of current page** on the Browser Source (or toggle visibility)
 
 **Layout test without Streamer.bot:** open `overlay/index.html?demo=1`
 
-**Live test:** Streamer.bot running + overlay open (no demo) → type `!lockbox` in chat → chest animation + prize reveal.
-
-## 5. Optional — Channel Points
-
-Same C# works on a Channel Point redemption:
-
-1. Reward title `Open Lockbox`, Require Text = yes (box name)
-2. Trigger: Reward Redemption → same action / Execute C#
+**Inventory flash:** included on each open (`@{user} inventory: N opens`). Optional panel: `?inventory=1`
 
 ## 6. Arguments set after a successful roll
 
 | Argument | Meaning |
 |----------|---------|
-| `userName` | Viewer |
+| `userName` | Viewer display name |
 | `boxId` / `boxName` | Resolved box |
 | `prizeName` / `prizeRarity` / `prizeId` | Rolled item |
+| `lockboxIcon` | Emoji or icon path from boxes.json |
+| `inventoryCount` | Opens stored for that viewer (max 50 kept) |
 
 ## 7. Overlay event contract
 
@@ -77,12 +87,42 @@ Same C# works on a Channel Point redemption:
 {
   "type": "lockbox.open",
   "userName": "ViewerName",
-  "boxId": "dragon-cult",
-  "boxName": "Dragon Cult Lockbox",
-  "prizeName": "Azure Wyrmling Mount",
+  "boxId": "wild-adventures",
+  "boxName": "Wild Adventures Lockbox",
+  "prizeId": "wild-adventures-mythic-mount",
+  "prizeName": "Star Angler Mount",
   "prizeRarity": "mythic",
-  "source": "chat"
+  "icon": "🐴",
+  "inventoryCount": 3,
+  "source": "channel-points"
 }
 ```
 
-Overlay listens for **`General.Custom`** and plays the animation when `type` is `lockbox.open`.
+Overlay listens for **`General.Custom`** and plays when `type` is `lockbox.open`.
+
+## 8. Inventory file
+
+`data/inventory.json`:
+
+```json
+{
+  "viewers": {
+    "loginlower": {
+      "displayName": "DisplayName",
+      "opens": [
+        {
+          "ts": "2026-09-15T12:00:00.0000000Z",
+          "boxId": "wild-adventures",
+          "boxName": "Wild Adventures Lockbox",
+          "prizeId": "...",
+          "prizeName": "...",
+          "prizeRarity": "mythic",
+          "icon": "🐴"
+        }
+      ]
+    }
+  }
+}
+```
+
+Last **~50** opens per viewer are retained.

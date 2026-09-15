@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -9,49 +9,41 @@
 <body>
   <div id="stage" class="stage hidden" aria-live="polite">
     <div class="glow-ring" id="glowRing"></div>
+    <div class="particles" id="particles" aria-hidden="true"></div>
+
     <div class="viewer-line">
       <span id="viewerName">Viewer</span>
       <span class="opened-label">opened</span>
       <span id="boxName">Lockbox</span>
     </div>
+
     <div class="chest-wrap" id="chestWrap">
-      <svg class="chest" id="chest" viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <linearGradient id="wood" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#8b5a2b"/>
-            <stop offset="100%" stop-color="#5c3a1a"/>
-          </linearGradient>
-          <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#d4af37"/>
-            <stop offset="100%" stop-color="#8a6d1b"/>
-          </linearGradient>
-          <filter id="softGlow">
-            <feGaussianBlur stdDeviation="3" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <rect class="chest-body" x="30" y="78" width="180" height="85" rx="8" fill="url(#wood)" stroke="#3d2410" stroke-width="3"/>
-        <rect x="30" y="110" width="180" height="12" fill="#3d2410" opacity="0.35"/>
-        <rect x="105" y="100" width="30" height="28" rx="4" fill="url(#metal)" filter="url(#softGlow)"/>
-        <circle cx="120" cy="114" r="5" fill="#2a1a08"/>
-        <g class="chest-lid" id="chestLid" transform-origin="120px 78px">
-          <path d="M30 78 Q120 20 210 78 Z" fill="url(#wood)" stroke="#3d2410" stroke-width="3"/>
-          <rect x="95" y="48" width="50" height="14" rx="3" fill="url(#metal)"/>
-        </g>
-        <g class="sparkles" id="sparkles" opacity="0">
-          <circle cx="60" cy="50" r="3" fill="#fff6a0"/>
-          <circle cx="180" cy="45" r="2.5" fill="#ffe066"/>
-          <circle cx="120" cy="30" r="4" fill="#fff"/>
-          <circle cx="90" cy="60" r="2" fill="#ffd700"/>
-          <circle cx="155" cy="55" r="2.5" fill="#fff8c0"/>
-        </g>
-      </svg>
+      <div class="chest" id="chest">
+        <img class="chest-art" id="chestArt" src="chest-closed.png" alt="" />
+        <div class="chest-shine" id="chestShine"></div>
+      </div>
     </div>
+
     <div class="prize-panel" id="prizePanel">
+      <div class="prize-icon-wrap" id="prizeIconWrap">
+        <span class="prize-icon-emoji" id="prizeIconEmoji" hidden></span>
+        <img class="prize-icon-img" id="prizeIconImg" alt="" hidden />
+        <span class="prize-icon-gem" id="prizeIconGem" hidden>💎</span>
+      </div>
       <div class="rarity-badge" id="rarityBadge">RARE</div>
       <div class="prize-name" id="prizeName">Prize Name</div>
     </div>
+
+    <div class="inv-flash" id="invFlash" hidden>
+      <span id="invFlashText">@viewer inventory: 0 opens</span>
+    </div>
   </div>
+
+  <div id="invPanel" class="inv-panel" hidden>
+    <div class="inv-panel-title">Recent opens</div>
+    <ul id="invList" class="inv-list"></ul>
+  </div>
+
   <div id="status" class="status"></div>
   <script src="app.js"></script>
 </body>

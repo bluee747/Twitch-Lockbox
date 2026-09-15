@@ -1,80 +1,1757 @@
 {
   "_meta": {
-    "note": "Rates are approximate streamer-editable stand-ins for entertainment overlays — NOT official Cryptic Studios / Neverwinter drop tables. Edit weights freely for your channel.",
-    "version": "1.0.0",
-    "rarityOrder": ["common", "uncommon", "rare", "epic", "legendary", "mythic"]
+    "note": "Rates are stream-approximate stand-ins for entertainment overlays — NOT official Cryptic Studios / Neverwinter drop tables. Weights sum to ~10000 per box.",
+    "version": "2.0.0",
+    "rarityOrder": [
+      "common",
+      "uncommon",
+      "rare",
+      "epic",
+      "legendary",
+      "mythic"
+    ],
+    "weightTiers": {
+      "mythicGrandPrize": {
+        "weight": 45,
+        "pct": "~0.45%",
+        "odds": "~1/250",
+        "split": "mount 22 + companion 23"
+      },
+      "mythicInsignia": {
+        "weight": 50,
+        "pct": "~0.5%"
+      },
+      "epicLegendaryPack": {
+        "weight": 125,
+        "pct": "~1.25%"
+      },
+      "tarmaluneJackpot": {
+        "weight": 60,
+        "pct": "~0.6%"
+      },
+      "progressionPack": {
+        "weight": 2350,
+        "pct": "~23.5%"
+      },
+      "companionPack": {
+        "weight": 2350,
+        "pct": "~23.5%"
+      },
+      "enchantmentPack": {
+        "weight": 2350,
+        "pct": "~23.5%"
+      },
+      "commonFiller": {
+        "weight": 2670,
+        "pct": "~26.7%"
+      }
+    },
+    "totalWeightTarget": 10000
   },
   "boxes": [
     {
-      "id": "dragon-cult",
-      "displayName": "Dragon Cult Lockbox",
-      "aliases": ["dragon", "dragoncult", "dragon-cult", "cult", "dc"],
+      "id": "wild-adventures",
+      "displayName": "Wild Adventures Lockbox",
+      "aliases": [
+        "wild",
+        "adventures",
+        "wildadventures",
+        "wa",
+        "angler"
+      ],
       "enabled": true,
       "items": [
-        { "id": "dc-coins", "name": "Rough Astral Diamonds", "rarity": "common", "weight": 320, "image": null },
-        { "id": "dc-enchant-t1", "name": "Lesser Dragon Cult Enchantment", "rarity": "common", "weight": 220, "image": null },
-        { "id": "dc-rp", "name": "Refinement Points Cache", "rarity": "uncommon", "weight": 160, "image": null },
-        { "id": "dc-companion-token", "name": "Companion Upgrade Token", "rarity": "uncommon", "weight": 100, "image": null },
-        { "id": "dc-mount-pack", "name": "Mount Training Manual", "rarity": "rare", "weight": 80, "image": null },
-        { "id": "dc-fashion", "name": "Cult Initiate Fashion Pack", "rarity": "rare", "weight": 55, "image": null },
-        { "id": "dc-epic-enchant", "name": "Greater Dragon Cult Enchantment", "rarity": "epic", "weight": 35, "image": null },
-        { "id": "dc-legendary-weapon", "name": "Cultist's Ruinous Blade (Account)", "rarity": "legendary", "weight": 18, "image": null },
-        { "id": "dc-mythic-mount", "name": "Azure Wyrmling Mount", "rarity": "mythic", "weight": 8, "image": null },
-        { "id": "dc-chase-companion", "name": "Tiamat's Chosen Companion", "rarity": "mythic", "weight": 4, "image": null }
+        {
+          "id": "wild-adventures-mythic-mount",
+          "name": "Star Angler Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "wild-adventures-mythic-companion",
+          "name": "Encore the Virtuoso Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "wild-adventures-mythic-insignia",
+          "name": "Mythic Wild Adventures Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "wild-adventures-epic-leg-pack",
+          "name": "Epic/Legendary Wild Adventures Choice Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "wild-adventures-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "wild-adventures-progression-pack",
+          "name": "Wild Adventures Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "wild-adventures-companion-pack",
+          "name": "Wild Adventures Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "wild-adventures-enchant-pack",
+          "name": "Wild Adventures Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "wild-adventures-junk",
+          "name": "Small Tarmalune Trade Bars & Wild Adventures Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "dragon-cult",
+      "displayName": "Dragon Cult Lockbox",
+      "aliases": [
+        "dragon",
+        "dragoncult",
+        "cult",
+        "dc",
+        "tiamat"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "dragon-cult-mythic-mount",
+          "name": "Azure Wyrmling Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "dragon-cult-mythic-companion",
+          "name": "Tiamat's Chosen Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "dragon-cult-mythic-insignia",
+          "name": "Mythic Dragon Cult Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "dragon-cult-epic-leg-pack",
+          "name": "Epic/Legendary Dragon Cult Relic Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "dragon-cult-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "dragon-cult-progression-pack",
+          "name": "Dragon Cult Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "dragon-cult-companion-pack",
+          "name": "Dragon Cult Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "dragon-cult-enchant-pack",
+          "name": "Dragon Cult Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "dragon-cult-junk",
+          "name": "Small Tarmalune Trade Bars & Dragon Cult Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
       ]
     },
     {
       "id": "leaping-flame",
       "displayName": "Leaping Flame Lockbox",
-      "aliases": ["leaping", "flame", "leapingflame", "leaping-flame", "lf", "fire"],
+      "aliases": [
+        "leaping",
+        "flame",
+        "leapingflame",
+        "lf",
+        "fire"
+      ],
       "enabled": true,
       "items": [
-        { "id": "lf-coins", "name": "Rough Astral Diamonds", "rarity": "common", "weight": 300, "image": null },
-        { "id": "lf-embers", "name": "Cinder Embers Bundle", "rarity": "common", "weight": 200, "image": null },
-        { "id": "lf-rp", "name": "Refinement Points Cache", "rarity": "uncommon", "weight": 150, "image": null },
-        { "id": "lf-torch", "name": "Eternal Torch Decoration", "rarity": "uncommon", "weight": 110, "image": null },
-        { "id": "lf-enchant", "name": "Flameward Enchantment", "rarity": "rare", "weight": 90, "image": null },
-        { "id": "lf-fashion", "name": "Ember Dancer Fashion Pack", "rarity": "rare", "weight": 60, "image": null },
-        { "id": "lf-epic-mount-token", "name": "Rare Mount Choice Pack", "rarity": "epic", "weight": 40, "image": null },
-        { "id": "lf-legendary", "name": "Phoenix-Touched Artifact Set Piece", "rarity": "legendary", "weight": 30, "image": null },
-        { "id": "lf-mythic-mount", "name": "Leaping Flame Courser", "rarity": "mythic", "weight": 15, "image": null },
-        { "id": "lf-chase", "name": "Inferno Drake Mount", "rarity": "mythic", "weight": 5, "image": null }
+        {
+          "id": "leaping-flame-mythic-mount",
+          "name": "Leaping Flame Courser Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "leaping-flame-mythic-companion",
+          "name": "Ember Phoenix Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "leaping-flame-mythic-insignia",
+          "name": "Mythic Leaping Flame Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "leaping-flame-epic-leg-pack",
+          "name": "Epic/Legendary Emberforged Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "leaping-flame-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "leaping-flame-progression-pack",
+          "name": "Leaping Flame Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "leaping-flame-companion-pack",
+          "name": "Leaping Flame Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "leaping-flame-enchant-pack",
+          "name": "Leaping Flame Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "leaping-flame-junk",
+          "name": "Small Tarmalune Trade Bars & Leaping Flame Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
       ]
     },
     {
-      "id": "justice",
-      "displayName": "Lockbox of Justice",
-      "aliases": ["justice", "loj", "order", "law"],
+      "id": "atramenous",
+      "displayName": "Atramenous Lockbox",
+      "aliases": [
+        "atra",
+        "atramenous",
+        "ink",
+        "shadow-ink"
+      ],
       "enabled": true,
       "items": [
-        { "id": "j-coins", "name": "Rough Astral Diamonds", "rarity": "common", "weight": 280, "image": null },
-        { "id": "j-scales", "name": "Scales of Judgment (RP)", "rarity": "common", "weight": 180, "image": null },
-        { "id": "j-seal", "name": "Seal of the Protector", "rarity": "uncommon", "weight": 140, "image": null },
-        { "id": "j-enchant", "name": "Justicar's Enchantment", "rarity": "uncommon", "weight": 120, "image": null },
-        { "id": "j-armor-pack", "name": "Knight of Neverwinter Pack", "rarity": "rare", "weight": 95, "image": null },
-        { "id": "j-title", "name": "Title: Defender of the City", "rarity": "rare", "weight": 70, "image": null },
-        { "id": "j-epic-weapon", "name": "Hammer of Absolute Law", "rarity": "epic", "weight": 50, "image": null },
-        { "id": "j-legendary-companion", "name": "Celestial Lion Companion", "rarity": "legendary", "weight": 35, "image": null },
-        { "id": "j-mythic-mount", "name": "Griffon of Tyr Mount", "rarity": "mythic", "weight": 22, "image": null },
-        { "id": "j-chase", "name": "Avatar of Justice Cosmetic Set", "rarity": "mythic", "weight": 8, "image": null }
+        {
+          "id": "atramenous-mythic-mount",
+          "name": "Atramenous Steed Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "atramenous-mythic-companion",
+          "name": "Inkbound Shade Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "atramenous-mythic-insignia",
+          "name": "Mythic Atramenous Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "atramenous-epic-leg-pack",
+          "name": "Epic/Legendary Inkwell Artifact Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "atramenous-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "atramenous-progression-pack",
+          "name": "Atramenous Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "atramenous-companion-pack",
+          "name": "Atramenous Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "atramenous-enchant-pack",
+          "name": "Atramenous Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "atramenous-junk",
+          "name": "Small Tarmalune Trade Bars & Atramenous Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
       ]
     },
     {
       "id": "dark-omens",
       "displayName": "Dark Omens Lockbox",
-      "aliases": ["dark", "omens", "darkomens", "dark-omens", "do", "omen"],
+      "aliases": [
+        "dark",
+        "omens",
+        "darkomens",
+        "do",
+        "omen"
+      ],
       "enabled": true,
       "items": [
-        { "id": "do-coins", "name": "Rough Astral Diamonds", "rarity": "common", "weight": 310, "image": null },
-        { "id": "do-shards", "name": "Omen Shards Bundle", "rarity": "common", "weight": 210, "image": null },
-        { "id": "do-rp", "name": "Refinement Points Cache", "rarity": "uncommon", "weight": 155, "image": null },
-        { "id": "do-curse-ward", "name": "Curseward Charm", "rarity": "uncommon", "weight": 105, "image": null },
-        { "id": "do-enchant", "name": "Shadowed Enchantment", "rarity": "rare", "weight": 85, "image": null },
-        { "id": "do-fashion", "name": "Nightseer Fashion Pack", "rarity": "rare", "weight": 58, "image": null },
-        { "id": "do-epic", "name": "Umbral Artifact Choice Pack", "rarity": "epic", "weight": 38, "image": null },
-        { "id": "do-legendary", "name": "Blade of Whispered Doom", "rarity": "legendary", "weight": 22, "image": null },
-        { "id": "do-mythic-companion", "name": "Shade of Shar Companion", "rarity": "mythic", "weight": 12, "image": null },
-        { "id": "do-chase", "name": "Nightmare Steed Mount", "rarity": "mythic", "weight": 5, "image": null }
+        {
+          "id": "dark-omens-mythic-mount",
+          "name": "Nightmare Steed Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "dark-omens-mythic-companion",
+          "name": "Shade of Shar Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "dark-omens-mythic-insignia",
+          "name": "Mythic Dark Omens Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "dark-omens-epic-leg-pack",
+          "name": "Epic/Legendary Umbral Choice Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "dark-omens-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "dark-omens-progression-pack",
+          "name": "Dark Omens Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "dark-omens-companion-pack",
+          "name": "Dark Omens Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "dark-omens-enchant-pack",
+          "name": "Dark Omens Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "dark-omens-junk",
+          "name": "Small Tarmalune Trade Bars & Dark Omens Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "justice",
+      "displayName": "Lockbox of Justice",
+      "aliases": [
+        "justice",
+        "loj",
+        "order",
+        "law",
+        "tyr"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "justice-mythic-mount",
+          "name": "Griffon of Tyr Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "justice-mythic-companion",
+          "name": "Celestial Lion Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "justice-mythic-insignia",
+          "name": "Mythic Justice Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "justice-epic-leg-pack",
+          "name": "Epic/Legendary Justicar Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "justice-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "justice-progression-pack",
+          "name": "Justice Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "justice-companion-pack",
+          "name": "Justice Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "justice-enchant-pack",
+          "name": "Justice Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "justice-junk",
+          "name": "Small Tarmalune Trade Bars & Justice Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "skeletal",
+      "displayName": "Skeletal Lockbox",
+      "aliases": [
+        "skeletal",
+        "skel",
+        "bone",
+        "bones",
+        "undead"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "skeletal-mythic-mount",
+          "name": "Bonebreaker Charger Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "skeletal-mythic-companion",
+          "name": "Skeletal Hound Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "skeletal-mythic-insignia",
+          "name": "Mythic Skeletal Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "skeletal-epic-leg-pack",
+          "name": "Epic/Legendary Boneforged Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "skeletal-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "skeletal-progression-pack",
+          "name": "Skeletal Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "skeletal-companion-pack",
+          "name": "Skeletal Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "skeletal-enchant-pack",
+          "name": "Skeletal Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "skeletal-junk",
+          "name": "Small Tarmalune Trade Bars & Skeletal Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "nightmare",
+      "displayName": "Nightmare Lockbox",
+      "aliases": [
+        "nightmare",
+        "nm",
+        "dream",
+        "horror"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "nightmare-mythic-mount",
+          "name": "Night Terror Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "nightmare-mythic-companion",
+          "name": "Dream Eater Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "nightmare-mythic-insignia",
+          "name": "Mythic Nightmare Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "nightmare-epic-leg-pack",
+          "name": "Epic/Legendary Nightmare Relic Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "nightmare-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "nightmare-progression-pack",
+          "name": "Nightmare Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "nightmare-companion-pack",
+          "name": "Nightmare Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "nightmare-enchant-pack",
+          "name": "Nightmare Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "nightmare-junk",
+          "name": "Small Tarmalune Trade Bars & Nightmare Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "nine-hells",
+      "displayName": "Nine Hells Lockbox",
+      "aliases": [
+        "ninehells",
+        "hells",
+        "hell",
+        "baator",
+        "nh"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "nine-hells-mythic-mount",
+          "name": "Infernal Warhorse Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "nine-hells-mythic-companion",
+          "name": "Imp of the Nine Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "nine-hells-mythic-insignia",
+          "name": "Mythic Nine Hells Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "nine-hells-epic-leg-pack",
+          "name": "Epic/Legendary Infernal Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "nine-hells-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "nine-hells-progression-pack",
+          "name": "Nine Hells Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "nine-hells-companion-pack",
+          "name": "Nine Hells Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "nine-hells-enchant-pack",
+          "name": "Nine Hells Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "nine-hells-junk",
+          "name": "Small Tarmalune Trade Bars & Nine Hells Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "mad-mage",
+      "displayName": "Mad Mage Lockbox",
+      "aliases": [
+        "madmage",
+        "mad",
+        "mage",
+        "halaster",
+        "undermountain"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "mad-mage-mythic-mount",
+          "name": "Halaster's Arcane Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "mad-mage-mythic-companion",
+          "name": "Mimic Familiar Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "mad-mage-mythic-insignia",
+          "name": "Mythic Mad Mage Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "mad-mage-epic-leg-pack",
+          "name": "Epic/Legendary Undermountain Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "mad-mage-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "mad-mage-progression-pack",
+          "name": "Mad Mage Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "mad-mage-companion-pack",
+          "name": "Mad Mage Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "mad-mage-enchant-pack",
+          "name": "Mad Mage Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "mad-mage-junk",
+          "name": "Small Tarmalune Trade Bars & Mad Mage Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "lost",
+      "displayName": "Lost Lockbox",
+      "aliases": [
+        "lost",
+        "forgotten",
+        "ruin"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "lost-mythic-mount",
+          "name": "Lost Horizon Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "lost-mythic-companion",
+          "name": "Forgotten Ward Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "lost-mythic-insignia",
+          "name": "Mythic Lost Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "lost-epic-leg-pack",
+          "name": "Epic/Legendary Relic of the Lost Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "lost-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "lost-progression-pack",
+          "name": "Lost Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "lost-companion-pack",
+          "name": "Lost Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "lost-enchant-pack",
+          "name": "Lost Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "lost-junk",
+          "name": "Small Tarmalune Trade Bars & Lost Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "magnificent",
+      "displayName": "Magnificent Lockbox",
+      "aliases": [
+        "magnificent",
+        "mag",
+        "splendor"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "magnificent-mythic-mount",
+          "name": "Magnificent Peacock Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "magnificent-mythic-companion",
+          "name": "Courtly Cat Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "magnificent-mythic-insignia",
+          "name": "Mythic Magnificent Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "magnificent-epic-leg-pack",
+          "name": "Epic/Legendary Magnificence Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "magnificent-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "magnificent-progression-pack",
+          "name": "Magnificent Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "magnificent-companion-pack",
+          "name": "Magnificent Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "magnificent-enchant-pack",
+          "name": "Magnificent Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "magnificent-junk",
+          "name": "Small Tarmalune Trade Bars & Magnificent Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "spellbound",
+      "displayName": "Spellbound Lockbox",
+      "aliases": [
+        "spellbound",
+        "spell",
+        "bound",
+        "arcane"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "spellbound-mythic-mount",
+          "name": "Spellbound Carpet Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "spellbound-mythic-companion",
+          "name": "Arcane Owl Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "spellbound-mythic-insignia",
+          "name": "Mythic Spellbound Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "spellbound-epic-leg-pack",
+          "name": "Epic/Legendary Spellwoven Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "spellbound-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "spellbound-progression-pack",
+          "name": "Spellbound Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "spellbound-companion-pack",
+          "name": "Spellbound Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "spellbound-enchant-pack",
+          "name": "Spellbound Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "spellbound-junk",
+          "name": "Small Tarmalune Trade Bars & Spellbound Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "stardock",
+      "displayName": "Stardock Lockbox",
+      "aliases": [
+        "stardock",
+        "star",
+        "dock",
+        "astral"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "stardock-mythic-mount",
+          "name": "Stardock Skiff Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "stardock-mythic-companion",
+          "name": "Astral Mote Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "stardock-mythic-insignia",
+          "name": "Mythic Stardock Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "stardock-epic-leg-pack",
+          "name": "Epic/Legendary Stellar Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "stardock-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "stardock-progression-pack",
+          "name": "Stardock Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "stardock-companion-pack",
+          "name": "Stardock Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "stardock-enchant-pack",
+          "name": "Stardock Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "stardock-junk",
+          "name": "Small Tarmalune Trade Bars & Stardock Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "shaundakul",
+      "displayName": "Shaundakul Lockbox",
+      "aliases": [
+        "shaundakul",
+        "shaun",
+        "wind",
+        "traveler"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "shaundakul-mythic-mount",
+          "name": "Windwalker Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "shaundakul-mythic-companion",
+          "name": "Shaundakul's Raven Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "shaundakul-mythic-insignia",
+          "name": "Mythic Shaundakul Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "shaundakul-epic-leg-pack",
+          "name": "Epic/Legendary Traveler's Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "shaundakul-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "shaundakul-progression-pack",
+          "name": "Shaundakul Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "shaundakul-companion-pack",
+          "name": "Shaundakul Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "shaundakul-enchant-pack",
+          "name": "Shaundakul Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "shaundakul-junk",
+          "name": "Small Tarmalune Trade Bars & Shaundakul Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "reborn",
+      "displayName": "Reborn Lockbox",
+      "aliases": [
+        "reborn",
+        "phoenix",
+        "renewal"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "reborn-mythic-mount",
+          "name": "Reborn Phoenix Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "reborn-mythic-companion",
+          "name": "Ashen Cub Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "reborn-mythic-insignia",
+          "name": "Mythic Reborn Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "reborn-epic-leg-pack",
+          "name": "Epic/Legendary Rebirth Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "reborn-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "reborn-progression-pack",
+          "name": "Reborn Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "reborn-companion-pack",
+          "name": "Reborn Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "reborn-enchant-pack",
+          "name": "Reborn Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "reborn-junk",
+          "name": "Small Tarmalune Trade Bars & Reborn Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "runic",
+      "displayName": "Runic Lockbox",
+      "aliases": [
+        "runic",
+        "rune",
+        "runes"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "runic-mythic-mount",
+          "name": "Runic Guardian Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "runic-mythic-companion",
+          "name": "Rune Wolf Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "runic-mythic-insignia",
+          "name": "Mythic Runic Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "runic-epic-leg-pack",
+          "name": "Epic/Legendary Rune-Carved Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "runic-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "runic-progression-pack",
+          "name": "Runic Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "runic-companion-pack",
+          "name": "Runic Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "runic-enchant-pack",
+          "name": "Runic Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "runic-junk",
+          "name": "Small Tarmalune Trade Bars & Runic Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "soulmonger",
+      "displayName": "Soulmonger Lockbox",
+      "aliases": [
+        "soulmonger",
+        "soul",
+        "monger",
+        "chult"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "soulmonger-mythic-mount",
+          "name": "Soulmonger Drake Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "soulmonger-mythic-companion",
+          "name": "Acererak's Wisp Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "soulmonger-mythic-insignia",
+          "name": "Mythic Soulmonger Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "soulmonger-epic-leg-pack",
+          "name": "Epic/Legendary Tomb Relic Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "soulmonger-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "soulmonger-progression-pack",
+          "name": "Soulmonger Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "soulmonger-companion-pack",
+          "name": "Soulmonger Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "soulmonger-enchant-pack",
+          "name": "Soulmonger Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "soulmonger-junk",
+          "name": "Small Tarmalune Trade Bars & Soulmonger Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "stealth",
+      "displayName": "Stealth Lockbox",
+      "aliases": [
+        "stealth",
+        "shadow",
+        "assassin",
+        "rogue"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "stealth-mythic-mount",
+          "name": "Shadow Panther Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "stealth-mythic-companion",
+          "name": "Silent Stalker Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "stealth-mythic-insignia",
+          "name": "Mythic Stealth Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "stealth-epic-leg-pack",
+          "name": "Epic/Legendary Shadowcraft Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "stealth-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "stealth-progression-pack",
+          "name": "Stealth Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "stealth-companion-pack",
+          "name": "Stealth Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "stealth-enchant-pack",
+          "name": "Stealth Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "stealth-junk",
+          "name": "Small Tarmalune Trade Bars & Stealth Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
+      ]
+    },
+    {
+      "id": "new-life",
+      "displayName": "New Life Lockbox",
+      "aliases": [
+        "newlife",
+        "new",
+        "life",
+        "nl",
+        "spring"
+      ],
+      "enabled": true,
+      "items": [
+        {
+          "id": "new-life-mythic-mount",
+          "name": "Spring Courser Mount",
+          "rarity": "mythic",
+          "weight": 22,
+          "icon": "🐴",
+          "category": "grand"
+        },
+        {
+          "id": "new-life-mythic-companion",
+          "name": "Life Bloom Sprite Companion",
+          "rarity": "mythic",
+          "weight": 23,
+          "icon": "🐾",
+          "category": "grand"
+        },
+        {
+          "id": "new-life-mythic-insignia",
+          "name": "Mythic New Life Insignia",
+          "rarity": "mythic",
+          "weight": 50,
+          "icon": "💠",
+          "category": "insignia"
+        },
+        {
+          "id": "new-life-epic-leg-pack",
+          "name": "Epic/Legendary Bloom Pack",
+          "rarity": "legendary",
+          "weight": 125,
+          "icon": "📦",
+          "category": "pack"
+        },
+        {
+          "id": "new-life-ttb-jackpot",
+          "name": "Tarmalune Trade Bar Jackpot",
+          "rarity": "epic",
+          "weight": 60,
+          "icon": "💰",
+          "category": "jackpot"
+        },
+        {
+          "id": "new-life-progression-pack",
+          "name": "New Life Progression Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "📈",
+          "category": "standard"
+        },
+        {
+          "id": "new-life-companion-pack",
+          "name": "New Life Companion Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "🦊",
+          "category": "standard"
+        },
+        {
+          "id": "new-life-enchant-pack",
+          "name": "New Life Enchantment Pack",
+          "rarity": "rare",
+          "weight": 2350,
+          "icon": "✨",
+          "category": "standard"
+        },
+        {
+          "id": "new-life-junk",
+          "name": "Small Tarmalune Trade Bars & New Life Kits",
+          "rarity": "common",
+          "weight": 2670,
+          "icon": "🪙",
+          "category": "junk"
+        }
       ]
     }
   ]

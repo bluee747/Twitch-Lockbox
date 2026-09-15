@@ -1,6 +1,6 @@
-﻿// =============================================================================
+// =============================================================================
 // Neverwinter Lockbox Opener — Streamer.bot Execute C# Code (CPHInline)
-// Chat: !lockbox / !open [box name]
+// CHANNEL POINTS ONLY — reward "Open Lockbox" (free !lockbox/!open disabled).
 // No System.Linq / Regex — works with default Streamer.bot references.
 // =============================================================================
 using System;
@@ -12,27 +12,50 @@ using Newtonsoft.Json.Linq;
 
 public class CPHInline
 {
+    // Absolute paths on the streamer PC (edit if you install elsewhere):
     private const string BOXES_JSON_PATH = @"D:\Overlays\Twitch-Lockbox\data\boxes.json";
-    private const string DEFAULT_BOX_ID = "dragon-cult";
-    private static readonly string[] COMMAND_NAMES = { "lockbox", "open" };
+    private const string INVENTORY_JSON_PATH = @"D:\Overlays\Twitch-Lockbox\data\inventory.json";
+    // Relative-friendly (same folder layout): data\boxes.json and data\inventory.json
+    // next to the repo root when run from D:\Overlays\Twitch-Lockbox\
+
+    private const string DEFAULT_BOX_ID = "wild-adventures";
     private const string REWARD_TITLE = "Open Lockbox";
     private const bool CANCEL_ON_INVALID_BOX = true;
+    private const int MAX_OPENS_PER_VIEWER = 50;
 
     public bool Execute()
     {
         string userName = "";
+        string userLogin = "";
         string rewardId = "";
         string redemptionId = "";
+        string rewardName = "";
 
         CPH.TryGetArg("userName", out userName);
         if (string.IsNullOrWhiteSpace(userName))
             CPH.TryGetArg("user", out userName);
+        CPH.TryGetArg("userLogin", out userLogin);
+        if (string.IsNullOrWhiteSpace(userLogin))
+            CPH.TryGetArg("userIdName", out userLogin);
+        if (string.IsNullOrWhiteSpace(userLogin))
+            userLogin = userName;
         CPH.TryGetArg("rewardId", out rewardId);
         CPH.TryGetArg("redemptionId", out redemptionId);
+        CPH.TryGetArg("rewardName", out rewardName);
+        if (string.IsNullOrWhiteSpace(rewardName))
+            CPH.TryGetArg("rewardTitle", out rewardName);
 
         userName = (userName ?? "").Trim();
         if (string.IsNullOrWhiteSpace(userName))
             userName = "UnknownViewer";
+        userLogin = (userLogin ?? userName).Trim().ToLowerInvariant();
+
+        // Channel points only — reject free chat command opens
+        if (string.IsNullOrEmpty(redemptionId))
+        {
+            CPH.SendMessage("@" + userName + " Lockboxes open via Channel Points reward \"" + REWARD_TITLE + "\" only. Use !inventory to see your recent prizes.");
+            return false;
+        }
 
         string boxInput = ExtractBoxInput();
 
@@ -71,7 +94,7 @@ public class CPHInline
 
         if (IsListRequest(boxInput))
         {
-            CPH.SendMessage("@" + userName + " Lockboxes: " + JoinBoxIds(enabled) + " — use !lockbox <name>");
+            CPH.SendMessage("@" + userName + " Lockboxes: " + JoinBoxIds(enabled));
             return true;
         }
 
@@ -100,17 +123,21 @@ public class CPHInline
             return false;
         }
 
+        string icon = prize.icon ?? "";
+        int inventoryCount = AppendInventory(userLogin, userName, box, prize, icon);
+
         CPH.SetArgument("prizeName", prize.name);
         CPH.SetArgument("prizeRarity", prize.rarity);
         CPH.SetArgument("prizeId", prize.id ?? "");
         CPH.SetArgument("boxId", box.id);
         CPH.SetArgument("boxName", box.displayName);
         CPH.SetArgument("userName", userName);
-        CPH.SetArgument("lockboxImage", prize.image ?? "");
+        CPH.SetArgument("lockboxIcon", icon);
+        CPH.SetArgument("inventoryCount", inventoryCount.ToString());
 
-        CPH.SendMessage("🔐 @" + userName + " opened a " + box.displayName + " and received [" + (prize.rarity ?? "").ToUpper() + "] " + prize.name + "!");
+        CPH.SendMessage("🔐 @" + userName + " opened a " + box.displayName + " and received [" + (prize.rarity ?? "").ToUpper() + "] " + prize.name + "! (opens: " + inventoryCount + ")");
 
-        string payload = BuildLockboxJson(userName, box, prize, rewardId, redemptionId);
+        string payload = BuildLockboxJson(userName, box, prize, icon, inventoryCount, rewardId, redemptionId);
         try
         {
             CPH.WebsocketBroadcastJson(payload);
@@ -123,6 +150,82 @@ public class CPHInline
         return true;
     }
 
+    private int AppendInventory(string loginLower, string displayName, BoxDef box, ItemDef prize, string icon)
+    {
+        JObject invRoot;
+        try
+        {
+            if (File.Exists(INVENTORY_JSON_PATH))
+            {
+                string raw = File.ReadAllText(INVENTORY_JSON_PATH, Encoding.UTF8);
+                if (string.IsNullOrWhiteSpace(raw))
+                    invRoot = new JObject();
+                else
+                    invRoot = JObject.Parse(raw);
+            }
+            else
+            {
+                invRoot = new JObject();
+            }
+        }
+        catch (Exception ex)
+        {
+            CPH.LogWarn("[Lockbox] inventory read failed, starting fresh: " + ex.Message);
+            invRoot = new JObject();
+        }
+
+        JObject viewers = invRoot["viewers"] as JObject;
+        if (viewers == null)
+        {
+            viewers = new JObject();
+            invRoot["viewers"] = viewers;
+        }
+
+        JObject viewer = viewers[loginLower] as JObject;
+        if (viewer == null)
+        {
+            viewer = new JObject();
+            viewers[loginLower] = viewer;
+        }
+        viewer["displayName"] = displayName;
+
+        JArray opens = viewer["opens"] as JArray;
+        if (opens == null)
+        {
+            opens = new JArray();
+            viewer["opens"] = opens;
+        }
+
+        JObject entry = new JObject
+        {
+            ["ts"] = DateTime.UtcNow.ToString("o"),
+            ["boxId"] = box.id ?? "",
+            ["boxName"] = box.displayName ?? "",
+            ["prizeId"] = prize.id ?? "",
+            ["prizeName"] = prize.name ?? "",
+            ["prizeRarity"] = prize.rarity ?? "",
+            ["icon"] = icon ?? ""
+        };
+        opens.Add(entry);
+
+        while (opens.Count > MAX_OPENS_PER_VIEWER)
+            opens.RemoveAt(0);
+
+        try
+        {
+            string dir = Path.GetDirectoryName(INVENTORY_JSON_PATH);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            File.WriteAllText(INVENTORY_JSON_PATH, invRoot.ToString(Formatting.Indented), Encoding.UTF8);
+        }
+        catch (Exception ex)
+        {
+            CPH.LogError("[Lockbox] inventory write failed: " + ex.Message);
+        }
+
+        return opens.Count;
+    }
+
     private string ExtractBoxInput()
     {
         string input = "";
@@ -131,29 +234,12 @@ public class CPHInline
             CPH.TryGetArg("rawInput", out input);
         if (string.IsNullOrWhiteSpace(input))
             CPH.TryGetArg("userInput", out input);
-
-        string message = "";
-        CPH.TryGetArg("msg", out message);
-        if (string.IsNullOrWhiteSpace(message))
-            CPH.TryGetArg("message", out message);
+        if (string.IsNullOrWhiteSpace(input))
+            CPH.TryGetArg("rawInputEscaped", out input);
 
         if (!string.IsNullOrWhiteSpace(input))
             return input.Trim();
-
-        if (string.IsNullOrWhiteSpace(message))
-            return "";
-
-        string m = message.Trim();
-        string lower = m.ToLowerInvariant();
-        for (int i = 0; i < COMMAND_NAMES.Length; i++)
-        {
-            string cmd = "!" + COMMAND_NAMES[i].ToLowerInvariant();
-            if (lower == cmd)
-                return "";
-            if (lower.StartsWith(cmd + " "))
-                return m.Substring(cmd.Length).Trim();
-        }
-        return m;
+        return "";
     }
 
     private static bool IsListRequest(string input)
@@ -177,7 +263,8 @@ public class CPHInline
     private static string JoinBoxLabels(List<BoxDef> enabled)
     {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < enabled.Count; i++)
+        int max = enabled.Count < 8 ? enabled.Count : 8;
+        for (int i = 0; i < max; i++)
         {
             if (i > 0) sb.Append(", ");
             sb.Append(enabled[i].displayName);
@@ -185,6 +272,7 @@ public class CPHInline
             sb.Append(enabled[i].id);
             sb.Append(")");
         }
+        if (enabled.Count > max) sb.Append(", …");
         return sb.ToString();
     }
 
@@ -281,7 +369,7 @@ public class CPHInline
         return valid[valid.Count - 1];
     }
 
-    private string BuildLockboxJson(string userName, BoxDef box, ItemDef prize, string rewardId, string redemptionId)
+    private string BuildLockboxJson(string userName, BoxDef box, ItemDef prize, string icon, int inventoryCount, string rewardId, string redemptionId)
     {
         var obj = new JObject
         {
@@ -292,11 +380,12 @@ public class CPHInline
             ["prizeId"] = prize.id ?? "",
             ["prizeName"] = prize.name ?? "",
             ["prizeRarity"] = prize.rarity ?? "",
-            ["prizeImage"] = prize.image ?? "",
+            ["icon"] = icon ?? "",
+            ["inventoryCount"] = inventoryCount,
             ["rewardTitle"] = REWARD_TITLE,
             ["rewardId"] = rewardId ?? "",
             ["redemptionId"] = redemptionId ?? "",
-            ["source"] = string.IsNullOrEmpty(redemptionId) ? "chat" : "channel-points"
+            ["source"] = "channel-points"
         };
         return obj.ToString(Formatting.None);
     }
@@ -316,6 +405,8 @@ public class CPHInline
         public string name { get; set; }
         public string rarity { get; set; }
         public int weight { get; set; }
+        public string icon { get; set; }
+        public string category { get; set; }
         public string image { get; set; }
     }
 }
